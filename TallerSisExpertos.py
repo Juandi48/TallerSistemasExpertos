@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 RespirAI - Sistema experto para diagnóstico básico de enfermedades respiratorias
-Autor: Juan Diego Rojas Vargas
+Autor: Juan Diego Rojas Vargas, Juan Martin Trejos, Victoria Elizabeth Roa González y Hania Valentina Carreño Baquero
 Tema: Medicina (diagnóstico básico de enfermedades respiratorias comunes)
 """
 
