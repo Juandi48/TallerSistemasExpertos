@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """
 RespirAI - Sistema experto interactivo para diagnóstico básico de enfermedades respiratorias
-Autor: Juan Diego Rojas Vargas
-Versión extendida: 25 reglas / 20 hechos
+Autores: Juan Diego Rojas Vargas, Juan Martin Trejos, Victoria Elizabeth Roa González y Hania Valentina Carreño Baquero
+Versión: Validación lógica (inconsistencias + sin síntomas)
 """
 
 # ----- Base de conocimiento -----
@@ -47,8 +47,6 @@ reglas = [
     # ---- CONSULTA MÉDICA ----
     {"condiciones": ["sintomas_mas_10_dias"], "excluir": ["fiebre"], "diagnostico": "Consulta médica necesaria", "recomendacion": "Acudir a un profesional de la salud.", "prioridad": 99},
     {"condiciones": ["fatiga", "tos_leve", "sintomas_mas_10_dias"], "diagnostico": "Cansancio prolongado con tos", "recomendacion": "Se recomienda evaluación médica.", "prioridad": 85},
-    {"condiciones": ["tos_leve", "dolor_garganta", "fatiga"], "diagnostico": "Infección respiratoria leve", "recomendacion": "Reposo e hidratación.", "prioridad": 60},
-    {"condiciones": ["fiebre", "dificultad_respirar", "dolor_pecho"], "diagnostico": "Posible infección pulmonar", "recomendacion": "Buscar atención médica urgente.", "prioridad": 95},
     {"condiciones": ["tos_fuerte", "dolor_garganta", "fatiga"], "diagnostico": "Infección respiratoria persistente", "recomendacion": "Consulta médica para descartar complicaciones.", "prioridad": 75}
 ]
 
@@ -76,6 +74,13 @@ sintomas_posibles = [
     "vomito"
 ]
 
+# ----- Combinaciones lógicamente inconsistentes -----
+combinaciones_invalidas = [
+    ("tos_leve", "tos_fuerte"),
+    ("tos_leve", "tos_seca"),
+    ("tos_fuerte", "tos_seca")
+]
+
 # ----- Función para preguntar síntomas -----
 def preguntar_sintomas():
     sintomas_usuario = []
@@ -88,6 +93,26 @@ def preguntar_sintomas():
         elif respuesta == "no":
             sintomas_usuario.append("no_" + sintoma)
     return sintomas_usuario
+
+# ----- Validación lógica -----
+def validar_coherencia(sintomas_usuario):
+    positivos = [s for s in sintomas_usuario if not s.startswith("no_")]
+
+    # Validar combinaciones imposibles
+    for a, b in combinaciones_invalidas:
+        if a in positivos and b in positivos:
+            print("\n❌ Inconsistencia detectada:")
+            print(f"No es lógico tener '{a.replace('_',' ')}' y '{b.replace('_',' ')}' al mismo tiempo.")
+            print("Por favor revise las respuestas.")
+            return False
+
+    # Validar si no hay ningún síntoma positivo
+    if len(positivos) == 0:
+        print("\n✅ No se detectaron síntomas.")
+        print("Parece que su estado de salud es normal.\n")
+        return False
+
+    return True
 
 # ----- Motor de inferencia -----
 def diagnosticar(sintomas_usuario):
@@ -114,4 +139,6 @@ if __name__ == "__main__":
     print("Diagnóstico básico de enfermedades respiratorias comunes.\n")
 
     sintomas_usuario = preguntar_sintomas()
-    diagnosticar(sintomas_usuario)
+
+    if validar_coherencia(sintomas_usuario):
+        diagnosticar(sintomas_usuario)
